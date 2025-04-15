@@ -5,7 +5,7 @@ const beef = {
         .setName('beef')
         .setDescription('Gives the beef'),
     async execute(interaction) {
-        await interaction.reply(`Here\'s your beef: `);
+        await interaction.reply({ content: "Here's your beef: 🥩" });
     },
 };
 
