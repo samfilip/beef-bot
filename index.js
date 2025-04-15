@@ -7,7 +7,7 @@ import { fileURLToPath } from 'url';
 
 dotenv.config();
 const discordToken = process.env.DISCORD_TOKEN;
-const clientId = process.env.CLIENT_ID; // You'll need to add this to your .env file
+const clientId = process.env.CLIENT_ID;
 
 const client = new Client({
   intents: [
@@ -19,25 +19,21 @@ const client = new Client({
   ]
 });
 
-// Initialize commands collection
+
 client.commands = new Collection();
 
-// Set up directory paths for ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const commandsPath = path.join(__dirname, 'commands');
 const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
 
-// Command registration array for REST API
 const commands = [];
 
-// Load command files
 for (const file of commandFiles) {
   const filePath = path.join(commandsPath, file);
-  const module = await import(`file://${filePath}`); // Using file:// protocol for ESM imports
+  const module = await import(`file://${filePath}`);
   const command = module.default;
-  
-  // Set commands in collection and add to registration array
+
   if ('data' in command && 'execute' in command) {
     client.commands.set(command.data.name, command);
     commands.push(command.data.toJSON());
@@ -46,15 +42,13 @@ for (const file of commandFiles) {
   }
 }
 
-// Deploy commands using REST
 const rest = new REST({ version: '10' }).setToken(discordToken);
 
 async function deployCommands() {
   try {
     console.log(`Started refreshing ${commands.length} application (/) commands.`);
-
-    // The put method is used to fully refresh all commands
-    const data = await rest.put(
+    
+		const data = await rest.put(
       Routes.applicationCommands(clientId),
       { body: commands },
     );
@@ -65,7 +59,6 @@ async function deployCommands() {
   }
 }
 
-// When the client is ready, run this code
 client.once(Events.ClientReady, c => {
   console.log(`Ready! Logged in as ${c.user.tag}`);
   deployCommands();
