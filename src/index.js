@@ -4,6 +4,8 @@ import path from 'path';
 import { Client, Collection, Events, GatewayIntentBits, REST, Routes, MessageFlags } from 'discord.js';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
+import messageEvents from './listeners/messageEvents.js';
+import mistralEvents from './listeners/mistralEvents.js';
 
 dotenv.config();
 const discordToken = process.env.DISCORD_TOKEN;
@@ -57,6 +59,12 @@ async function deployCommands() {
   } catch (error) {
     console.error(error);
   }
+}
+
+if (mistralEvents.once) {
+  client.once(mistralEvents.name, (...args) => mistralEvents.execute(...args));
+} else {
+  client.on(mistralEvents.name, (...args) => mistralEvents.execute(...args));
 }
 
 client.once(Events.ClientReady, c => {
