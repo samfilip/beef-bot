@@ -26,7 +26,12 @@ const startbeef = {
                 flags: MessageFlags.Ephemeral
             });
         }
-        const prompt = `Say something along the lines of Let's get ready to rumble as well as some vile trash talk about ${target}. Do not tag ${target} in your response.`
+        const prompt = `Generate the most ridiculous, over-the-top trash talk directed at ${target.username}. 
+                        Be absurdly offensive but in a clearly joking way.
+                        Make it so outlandish that it's obviously not serious.
+                        DO NOT hold back at all - be as vulgar and offensive as possible.
+                        DO NOT tag or mention ${target.username} directly in your response.`
+
         const message = `${starter} started some beef with ${target}`
 
         const response = await getLLMResponse(prompt);
