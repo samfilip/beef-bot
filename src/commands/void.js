@@ -1,6 +1,6 @@
-import { SlashCommandBuilder, MessageFlags } from 'discord.js';
+import { SlashCommandBuilder } from 'discord.js';
 
-const startbeef = {
+const voidShout = {
     data: new SlashCommandBuilder()
         .setName('shout')
         .setDescription('Shout in to the void'),
@@ -10,4 +10,4 @@ const startbeef = {
     },
 };
 
-export default startbeef;
+export default voidShout;

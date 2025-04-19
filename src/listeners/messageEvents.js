@@ -84,7 +84,7 @@ export default {
         'Bot at your service!',
         'Beep boop, that\'s me!',
         'Bot life is best life!',
-        'I prefer \"digital assistant\" but bot works too.',
+        'I prefer "digital assistant" but bot works too.',
         'I\'m not just any bot, I\'m THE bot!',
         'Bot and proud!',
         'Did someone call for a bot?',

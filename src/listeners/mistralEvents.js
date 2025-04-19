@@ -1,8 +1,5 @@
 import { Events } from "discord.js";
-import axios from "axios";
-
-// Try both localhost and the Windows host from WSL
-const WINDOWS_HOST = "host.docker.internal"; // This is often how WSL can access Windows
+import getLLMResponse from "../ollama/response.js";
 
 export default {
   name: Events.MessageCreate,
@@ -11,87 +8,44 @@ export default {
     if (message.author.bot) return;
     
     const content = message.content.toLowerCase();
-    
-    // Only implement a simpler version for testing
-    if (content === 'ping') {
-      // Start typing - will stop automatically when message is sent
+
+    const greetings = ['sup', 'yo', 'hey'];
+    if (greetings.includes(content)) {
       message.channel.sendTyping();
-      
-      try {
-        // Try to connect to Ollama with a short timeout
-        console.log("Attempting to connect to Ollama...");
-        
-        // Try Windows host first
-        let modelResponse;
-        try {
-          console.log(`Trying Windows host: ${WINDOWS_HOST}`);
-          const response = await axios.post(`http://${WINDOWS_HOST}:11434/api/generate`, {
-            model: "mistral",
-            prompt: "Reply with only the word 'PONG' in all caps.",
-            stream: false
-          }, { timeout: 5000 }); // 5 second timeout
-          
-          modelResponse = response.data.response;
-          console.log("Got response from Windows host!");
-        } catch (windowsError) {
-          console.log(`Windows host error: ${windowsError.message}`);
-          
-          // Try localhost as fallback
-          console.log("Trying localhost fallback...");
-          const response = await axios.post("http://localhost:11434/api/generate", {
-            model: "mistral",
-            prompt: "Reply with only the word 'PONG' in all caps.",
-            stream: false
-          }, { timeout: 5000 }); // 5 second timeout
-          
-          modelResponse = response.data.response;
-          console.log("Got response from localhost!");
-        }
-        
-        // Send the response
-        message.reply(modelResponse || "Pong! (default response)");
-      } catch (error) {
-        // Log the error and send a fallback response
-        console.error("Error connecting to Ollama:", error.message);
-        message.reply("Pong! (I couldn't reach Ollama - check your server connection)");
-      }
+      const botResponse = await getLLMResponse('greeting');
+      message.reply(botResponse);
+      return;
     }
     
-    // Add a diagnostic command
-    if (content === 'test ollama') {
-      message.reply("Testing connection to Ollama, please wait...");
-      
-      try {
-        // Try multiple methods to connect
-        const methods = [
-          { name: "Windows host", url: `http://${WINDOWS_HOST}:11434/api/tags` },
-          { name: "Localhost", url: "http://localhost:11434/api/tags" },
-          // You can add more potential hosts here
-        ];
-        
-        let results = [];
-        
-        for (const method of methods) {
-          try {
-            console.log(`Testing ${method.name} at ${method.url}`);
-            const startTime = Date.now();
-            const response = await axios.get(method.url, { timeout: 3000 });
-            const endTime = Date.now();
-            
-            results.push(`✅ ${method.name}: Success (${endTime - startTime}ms)`);
-            console.log(`${method.name} succeeded!`);
-          } catch (err) {
-            results.push(`❌ ${method.name}: Failed (${err.message})`);
-            console.log(`${method.name} failed: ${err.message}`);
-          }
-        }
-        
-        // Send the results
-        message.reply(`Ollama connection test results:\n${results.join('\n')}`);
-      } catch (error) {
-        console.error("Error during Ollama test:", error);
-        message.reply("Error running Ollama connection tests. Check the console for details.");
+    const keywordPrompts = {
+      'beef': 'Generate a funny response about beef or steak',
+      'help': 'The user needs help. Tell them to use the /help command in a casual way',
+      'store.steampowered.com': 'Someone shared a Steam game link. Tell them no one wants to play their game in a rude but funny way',
+      'pizza': 'React enthusiastically to someone mentioning pizza',
+      'music': 'React enthusiastically to someone mentioning music',
+      'bot': 'Someone mentioned you are a bot. Acknowledge this in a clever way',
+      'cat': 'Make a sarcastic joke about cats with a subtle reference to the slang meaning of "pussy"',
+      'tired': 'Tell someone who is tired to go to sleep in a rude but funny way',
+      'wicked': 'Make a reference to the musical Wicked, specifically about defying gravity',
+      'bulgolgi': 'Say something enthusiastic about Korean bulgogi beef',
+      'load': 'Make an innuendo joke about the word "load"',
+      'entertain us': 'Make a pun that connects "entertain us" with "anus"',
+      'birthday': 'Give a darkly humorous birthday message about getting closer to death'
+    };
+
+    for (const [keyword, prompt] of Object.entries(keywordPrompts)) {
+      if (content.includes(keyword)) {
+        message.channel.sendTyping();
+        const botResponse = await getLLMResponse(prompt, content);
+        message.reply(botResponse);
+        return;
       }
+    }
+
+    if (content === 'ping') {
+      message.channel.sendTyping();
+      const botResponse = await getLLMResponse('ping');
+      message.reply(botResponse);
     }
   }
 }

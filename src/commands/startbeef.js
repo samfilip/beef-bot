@@ -1,6 +1,5 @@
-
-// commands/startbeef.js
 import { SlashCommandBuilder, MessageFlags } from 'discord.js';
+import getLLMResponse from '../ollama/response.js';
 
 const startbeef = {
     data: new SlashCommandBuilder()
@@ -27,8 +26,12 @@ const startbeef = {
                 flags: MessageFlags.Ephemeral
             });
         }
+        const prompt = `Say something along the lines of Let's get ready to rumble as well as some vile trash talk about ${target}. Do not tag ${target} in your response.`
+        const message = `${starter} started some beef with ${target}`
+
+        const response = await getLLMResponse(prompt);
         
-        await interaction.reply(`${starter} started some beef with ${target}. Let's get Beefy!`);
+        await interaction.reply(`${message}. ${response}`);
     },
 };
 
